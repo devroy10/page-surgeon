@@ -1,3 +1,17 @@
+<!-- <p align="center"><a href="https://ideogram.ai/" target="_blank" rel="noopener noreferrer"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/page-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="assets/page-light.png">
+  <img src="assets/page-light.png" alt="Ideogram" width="500">
+</picture></a></p> -->
+
+<p align="center"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/page-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="assets/page-light.png">
+  <img src="assets/page-light.png" alt="Ideogram" width="640">
+</picture></p>
+
+---
+
 # PageSurgeon
 
 A Chrome Extension for surgical page editing — delete, edit, screenshot, and blur any element on any webpage.
@@ -36,12 +50,12 @@ Published on Chrome Web Store (coming soon).
 
 ### Keyboard Shortcuts
 
-| Key | Mode | Action |
-|---|---|---|
-| `Escape` | All | Cancel / exit current action |
-| `Delete` | Delete | Remove selected element |
-| `Ctrl+Z` | Delete | Undo last deletion |
-| `Enter` | Edit Text | Save edited text |
+| Key      | Mode      | Action                       |
+| -------- | --------- | ---------------------------- |
+| `Escape` | All       | Cancel / exit current action |
+| `Delete` | Delete    | Remove selected element      |
+| `Ctrl+Z` | Delete    | Undo last deletion           |
+| `Enter`  | Edit Text | Save edited text             |
 
 ## Project Structure
 
