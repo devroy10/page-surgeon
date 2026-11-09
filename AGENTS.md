@@ -36,5 +36,5 @@ The extension uses a ModeController + pluggable mode classes:
 ### Messaging
 
 - Popup ↔ Content: `chrome.tabs.sendMessage` (SET_MODE, ACTIVATE, DEACTIVATE, GET_STATUS)
-- Background ↔ Content: `window.postMessage` (PAGESURGEON_TOGGLE)
-- Content → Background: `chrome.runtime.sendMessage` (CAPTURE_ELEMENT)
+- Content → Background: `chrome.runtime.sendMessage` (CAPTURE_ELEMENT, CAPTURE_TILE, DOWNLOAD_BLOB)
+- The background service worker validates `sender.id` and requires `sender.tab` for privileged actions.

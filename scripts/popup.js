@@ -23,6 +23,10 @@ class PopupManager {
   }
 
   init() {
+    const version = document.querySelector(".popup__version");
+    if (version) {
+      version.textContent = `v${chrome.runtime.getManifest().version}`;
+    }
     this.bindEvents();
     this.checkExtensionStatus();
   }
@@ -108,7 +112,7 @@ class PopupManager {
 
   syncUI() {
     if (this.isActive) {
-      this.elements.statusValue.textContent = `Active (${this.currentMode})`;
+      this.elements.statusValue.textContent = `Active · ${this.modeName(this.currentMode)}`;
       this.elements.statusValue.className =
         "popup__status-value popup__status-value--active";
       this.elements.activateButton.textContent = "Deactivate";
@@ -131,45 +135,55 @@ class PopupManager {
   updateActivateButtonLabel() {
     if (!this.isActive) {
       const labels = {
-        delete: "Activate Delete",
-        edit: "Activate Edit Text",
-        screenshot: "Activate Screenshot",
-        blur: "Activate Blur",
+        delete: "Activate delete",
+        edit: "Activate edit text",
+        screenshot: "Activate screenshot",
+        blur: "Activate blur",
       };
       this.elements.activateButton.textContent =
         labels[this.currentMode] || "Activate";
     }
   }
 
+  modeName(mode) {
+    const names = {
+      delete: "Delete",
+      edit: "Edit text",
+      screenshot: "Screenshot",
+      blur: "Blur",
+    };
+    return names[mode] || "Delete";
+  }
+
   updateHelpSteps() {
     const steps = {
       delete: [
-        'Click "Activate Delete" to start',
-        "Hover over elements to highlight them",
-        "Click to select an element",
-        "Press Delete or click 🗑️ Delete Element",
-        "Press Ctrl+Z or click ↩️ Undo to restore",
+        'Click "Activate delete" to start',
+        "Hover to highlight an element, click to select it",
+        'Press Delete or click "Delete element"',
+        'Press Ctrl+Z or click "Undo" to restore it',
+        "Press Esc to exit the mode",
       ],
       edit: [
-        'Click "Activate Edit Text" to start',
-        "Hover over text elements (p, h1, span, etc.)",
-        "Click a text element to make it editable",
-        "Type to edit the text",
-        "Press Enter or click away to save",
+        'Click "Activate edit text" to start',
+        "Hover text (paragraphs, headings, spans), then click it",
+        "Type your changes inline",
+        "Enter saves, Shift+Enter adds a line, clicking away saves",
+        'Esc cancels, or click "Save & exit" to finish',
       ],
       screenshot: [
-        'Click "Activate Screenshot" to start',
-        "Hover over elements to highlight them",
-        "Click to select an element",
-        'Click 📷 Capture Screenshot',
-        "Image saved to your Downloads folder",
+        'Click "Activate screenshot" to start',
+        "Hover to highlight an element, click to select it",
+        'Click "Capture screenshot" in the side panel',
+        "The full element is captured, even if scrolled off-screen",
+        "PNG is saved to your Downloads folder",
       ],
       blur: [
-        'Click "Activate Blur" to start',
-        "Hover over elements to highlight them",
-        "Click to select an element",
-        'Click 🔵 Apply & Save Blur',
-        "The blur persists across page reloads",
+        'Click "Activate blur" to start',
+        "Click one or more elements to preview the blur",
+        'Click "Apply & save blurs (N)" to persist them',
+        "Blurs re-apply on reload, scoped to this site",
+        "Esc clears unsaved previews and exits",
       ],
     };
 
@@ -184,24 +198,25 @@ class PopupManager {
     helpDiv.className = "popup__help-overlay";
     helpDiv.innerHTML = `
       <div class="popup__help-content">
-        <h2>PageSurgeon Help</h2>
+        <h2>PageSurgeon help</h2>
         <div class="popup__help-section">
           <strong>Modes</strong>
-          <p>🗑️ Delete — Remove elements from the page</p>
-          <p>✏️ Edit Text — Edit text content inline</p>
-          <p>📷 Screenshot — Capture element screenshots</p>
-          <p>🔵 Blur — Blur elements persistently</p>
+          <p>Delete — Remove elements from the page</p>
+          <p>Edit text — Edit text content inline</p>
+          <p>Screenshot — Capture element screenshots</p>
+          <p>Blur — Blur elements persistently</p>
         </div>
         <div class="popup__help-section">
-          <strong>Keyboard Shortcuts</strong>
+          <strong>Keyboard shortcuts</strong>
           <p>• Escape: Exit current mode</p>
           <p>• Delete: Delete selected element (Delete mode)</p>
           <p>• Ctrl+Z: Undo deletion (Delete mode)</p>
-          <p>• Enter: Save text (Edit Text mode)</p>
+          <p>• Enter: Save text (Edit text mode)</p>
+          <p>• Shift+Enter: New line (Edit text mode)</p>
         </div>
         <div class="popup__help-section">
-          <strong>Blur Mode</strong>
-          <p>Blurs are saved to browser storage. They re-apply when you visit the page again.</p>
+          <strong>Blur mode</strong>
+          <p>Click several elements to queue them, then apply the batch. Blurs are saved to browser storage and re-apply when you visit the site again.</p>
         </div>
         <button class="popup__button popup__button--primary" id="helpCloseBtn">Got it</button>
       </div>

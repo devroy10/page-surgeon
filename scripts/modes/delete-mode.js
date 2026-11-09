@@ -68,13 +68,16 @@ class DeleteMode {
   getPanelHTML() {
     return `
       <button class="pagesurgeon-panel__button pagesurgeon-panel__button--delete" id="modeActionBtn" disabled>
-        🗑️ Delete Element
+        <span class="pagesurgeon-panel__button-icon">${DomUtils.icon("trash")}</span>
+        <span class="pagesurgeon-panel__button-label">Delete element</span>
       </button>
       <button class="pagesurgeon-panel__button pagesurgeon-panel__button--undo" id="modeUndoBtn" disabled>
-        ↩️ Undo
+        <span class="pagesurgeon-panel__button-icon">${DomUtils.icon("undo")}</span>
+        <span class="pagesurgeon-panel__button-label">Undo</span>
       </button>
       <button class="pagesurgeon-panel__button pagesurgeon-panel__button--cancel" id="modeCancelBtn">
-        ❌ Cancel
+        <span class="pagesurgeon-panel__button-icon">${DomUtils.icon("x")}</span>
+        <span class="pagesurgeon-panel__button-label">Exit</span>
       </button>
       <div class="pagesurgeon-panel__info">
         Hover to highlight, click to select. Delete key to remove.

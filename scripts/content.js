@@ -38,9 +38,10 @@ class ModeController {
   async applyPersistentBlurs() {
     try {
       const { blurRules = [] } = await chrome.storage.local.get("blurRules");
-      const rules = blurRules.filter((r) =>
-        location.hostname.endsWith(r.urlPattern.replace("/*", ""))
-      );
+      const rules = blurRules.filter((r) => {
+        const ruleHost = r.urlPattern.replace(/\/\*$/, "");
+        return location.hostname === ruleHost;
+      });
 
       for (const rule of rules) {
         const el = document.querySelector(rule.selector);
@@ -74,28 +75,44 @@ class ModeController {
     this.sidePanel.className = "pagesurgeon-panel";
     this.sidePanel.innerHTML = `
       <div class="pagesurgeon-panel__header">
-        <h3 class="pagesurgeon-panel__title">PageSurgeon</h3>
+        <div class="pagesurgeon-panel__heading">
+          <h3 class="pagesurgeon-panel__title">PageSurgeon</h3>
+          <p class="pagesurgeon-panel__subtitle">Surgical page editing</p>
+        </div>
+        <button class="pagesurgeon-panel__close" id="panelCloseBtn" type="button" title="Exit" aria-label="Exit PageSurgeon">
+          ${DomUtils.icon("x")}
+        </button>
       </div>
       <div class="pagesurgeon-panel__body">
-        <div class="pagesurgeon-panel__status">
+        <div class="pagesurgeon-panel__status" role="status">
+          <span class="pagesurgeon-panel__status-dot"></span>
           <span class="pagesurgeon-panel__status-text" id="panelStatus">Ready</span>
         </div>
         <div class="pagesurgeon-panel__actions" id="panelActions"></div>
       </div>
+      <div class="pagesurgeon-panel__footer">
+        <span>Esc to exit</span>
+        <span>v${chrome.runtime.getManifest().version}</span>
+      </div>
     `;
     document.body.appendChild(this.sidePanel);
+
+    const closeBtn = this.sidePanel.querySelector("#panelCloseBtn");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => this.deactivate());
+    }
   }
 
   bindEvents() {
-    window.addEventListener("message", (event) => {
-      if (event.data.type === "PAGESURGEON_TOGGLE") {
-        this.isActive ? this.deactivate() : this.activate();
-      }
-    });
-
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (!sender || sender.id !== chrome.runtime.id) return false;
+
       switch (request.type) {
         case "SET_MODE":
+          if (!this.modes[request.mode]) {
+            sendResponse({ success: false, error: "Unknown mode" });
+            break;
+          }
           this.setMode(request.mode);
           sendResponse({ success: true });
           break;
@@ -114,7 +131,7 @@ class ModeController {
           });
           break;
       }
-      return true;
+      return false;
     });
   }
 
@@ -194,6 +211,7 @@ class ModeController {
       if (this.currentMode) {
         this.currentMode.onEscape();
       }
+      this.deactivate();
     } else if (event.key === "Delete" && this.currentModeName === "delete") {
       event.preventDefault();
       this.currentMode.onAction();
@@ -212,10 +230,13 @@ class ModeController {
       document.body.appendChild(this.highlightBox);
     }
     const rect = element.getBoundingClientRect();
+    const radius = window.getComputedStyle(element).borderRadius;
     this.highlightBox.style.left = `${rect.left + window.scrollX}px`;
     this.highlightBox.style.top = `${rect.top + window.scrollY}px`;
     this.highlightBox.style.width = `${rect.width}px`;
     this.highlightBox.style.height = `${rect.height}px`;
+    this.highlightBox.style.borderRadius =
+      radius && radius !== "0px" ? radius : "4px";
     if (element !== this.selectedElement) {
       this.highlightBox.classList.remove("pagesurgeon-highlight--selected");
     }
@@ -252,8 +273,13 @@ class ModeController {
       cancelBtn.addEventListener("click", () => this.deactivate());
     }
     const actionBtn = document.getElementById("modeActionBtn");
-    if (actionBtn && this.currentModeName !== "edit") {
-      actionBtn.addEventListener("click", () => this.currentMode.onAction());
+    if (actionBtn) {
+      actionBtn.addEventListener("click", () => {
+        this.currentMode.onAction();
+        if (this.currentModeName === "edit") {
+          this.deactivate();
+        }
+      });
     }
     const undoBtn = document.getElementById("modeUndoBtn");
     if (undoBtn) {
@@ -262,7 +288,9 @@ class ModeController {
   }
 
   updateStatus(text) {
-    const statusEl = document.getElementById("panelStatus");
+    const statusEl =
+      this.sidePanel?.querySelector("#panelStatus") ||
+      document.getElementById("panelStatus");
     if (statusEl) {
       statusEl.innerHTML = text;
     }

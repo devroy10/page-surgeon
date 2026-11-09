@@ -48,11 +48,11 @@ Popup                         Content Script                Page
 └──────────┘                 │                  │
                              │ Modes:           │
 Service Worker               │  DeleteMode      │
-┌──────────┐                 │  EditTextMode    │
-│ onInstalled │              │  ScreenshotMode  │
-│ action     │──postMessage─>│  BlurMode        │
-│ onClicked  │               └──────────────────┘
-└──────────┘
+┌──────────────┐             │  EditTextMode    │
+│ onInstalled  │             │  ScreenshotMode  │
+│ captureVisibleTab          │  BlurMode        │
+│ downloads    │<──runtime───└──────────────────┘
+└──────────────┘   messages
 ```
 
 ### 2.3 File Structure (Proposed)
@@ -87,29 +87,26 @@ pagesurgeon/
 | From | To | Type | When |
 |---|---|---|---|
 | Popup | Content | `SET_MODE` | User picks a mode |
-| Popup | Content | `DEACTIVATE` | User hits Cancel / Escape |
-| Content | Popup | `STATUS_UPDATE` | Mode changed, element selected, action done |
-| Background | Content (via postMessage) | `TOGGLE` | Icon clicked |
-| Content | Background | `CAPTURE_SCREENSHOT` | Screenshot mode action |
-| Background | Content | `SCREENSHOT_RESULT` | Data URL returned |
+| Popup | Content | `ACTIVATE` | User starts a mode |
+| Popup | Content | `DEACTIVATE` | User exits a mode |
+| Popup | Content | `GET_STATUS` | Popup opens |
+| Content | Background | `CAPTURE_ELEMENT` | Capture a visible element |
+| Content | Background | `CAPTURE_TILE` | Capture one scroll-and-stitch tile |
+| Content | Background | `DOWNLOAD_BLOB` | Save a stitched screenshot |
+| Background | Content | response | Capture or download result |
 
 ### 2.5 Permissions (Expanded)
 
 ```json
 {
-  "permissions": [
-    "activeTab",
-    "scripting",
-    "storage",
-    "downloads"
-  ],
+  "permissions": ["storage", "downloads"],
   "host_permissions": ["<all_urls>"]
 }
 ```
 
 - `storage` — persist blur rules
 - `downloads` — save screenshots
-- `activeTab` + `scripting` — already present; `captureVisibleTab` is covered by `activeTab`
+- `<all_urls>` — run the page overlay and re-apply saved blur rules; also covers `captureVisibleTab`
 
 ---
 
@@ -199,11 +196,11 @@ class EditTextMode {
 Uses the **native Chrome `chrome.tabs.captureVisibleTab`** API + canvas cropping:
 
 ```
-1. Content script sends { type: "CAPTURE_SCREENSHOT", rect: {x, y, w, h} }
+1. Content script sends { type: "CAPTURE_ELEMENT", rect: {left, top, width, height}, dpr }
    to the background service worker
 
 2. Background script calls:
-     const dataUrl = await chrome.tabs.captureVisibleTab(tabId, { format: "png" });
+     const dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: "png" });
 
 3. Background script crops the image to the element rect using an OffscreenCanvas:
      - Decode dataUrl into ImageBitmap
@@ -229,7 +226,7 @@ Uses the **native Chrome `chrome.tabs.captureVisibleTab`** API + canvas cropping
 - **Element hidden/offscreen**: Detect via `offsetParent === null` or rect not in viewport. Show warning in panel.
 - **Canvas/WebGL content**: Captured as raster (correct). No SVG vector capture in v1.
 - **High-DPI / devicePixelRatio**: Account for `devicePixelRatio` when cropping — multiply rect coords.
-- **Permission denial**: If user denies `activeTab` permission grant, show graceful error.
+- **Restricted page**: If Chrome blocks content scripts on the page, show a graceful error in the popup.
 
 ---
 
@@ -360,7 +357,7 @@ Side panel additions:
 │ [ Manage Blur Rules ]        │
 │         [ Help ]             │
 │                              │
-│         v0.2.0               │
+│         v0.1.0               │
 └──────────────────────────────┘
 ```
 

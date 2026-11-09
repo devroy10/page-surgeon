@@ -1,26 +1,29 @@
 {
   "manifest_version": 3,
   "name": "PageSurgeon",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "Surgically edit, delete, blur, and screenshot any element on a webpage",
-  "permissions": ["activeTab", "scripting", "storage", "downloads"],
+  "permissions": ["storage", "downloads"],
   "host_permissions": ["<all_urls>"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  },
   "background": {
     "service_worker": "scripts/background.js"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-        "js": [
-          "scripts/utils/dom-utils.js",
-          "scripts/utils/stitcher.js",
-          "scripts/utils/scroll-capture.js",
-          "scripts/modes/delete-mode.js",
-          "scripts/modes/edit-mode.js",
-          "scripts/modes/screenshot-mode.js",
-          "scripts/modes/blur-mode.js",
-          "scripts/content.js"
-        ],
+      "js": [
+        "scripts/utils/dom-utils.js",
+        "scripts/utils/stitcher.js",
+        "scripts/utils/scroll-capture.js",
+        "scripts/modes/delete-mode.js",
+        "scripts/modes/edit-mode.js",
+        "scripts/modes/screenshot-mode.js",
+        "scripts/modes/blur-mode.js",
+        "scripts/content.js"
+      ],
       "css": ["styles/panel.css"],
       "run_at": "document_end"
     }

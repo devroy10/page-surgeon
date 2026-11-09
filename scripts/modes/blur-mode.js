@@ -80,7 +80,7 @@ class BlurMode {
     await chrome.storage.local.set({ blurRules });
 
     this.controller.updateStatus(
-      `Saved ${this._previewQueue.length} blur${this._previewQueue.length > 1 ? "s" : ""} for ${location.hostname} ✓`
+      `Saved ${this._previewQueue.length} blur${this._previewQueue.length > 1 ? "s" : ""} for ${location.hostname}`
     );
     this._previewQueue = [];
     this.controller.clearSelection();
@@ -122,13 +122,15 @@ class BlurMode {
   getPanelHTML() {
     return `
       <button class="pagesurgeon-panel__button pagesurgeon-panel__button--action" id="modeActionBtn" disabled>
-        🔵 Apply & Save Blurs
+        <span class="pagesurgeon-panel__button-icon">${DomUtils.icon("blur")}</span>
+        <span class="pagesurgeon-panel__button-label">Apply & save blurs</span>
       </button>
       <button class="pagesurgeon-panel__button pagesurgeon-panel__button--cancel" id="modeCancelBtn">
-        ❌ Cancel
+        <span class="pagesurgeon-panel__button-icon">${DomUtils.icon("x")}</span>
+        <span class="pagesurgeon-panel__button-label">Exit</span>
       </button>
       <div class="pagesurgeon-panel__info">
-        Click elements to blur them, then Apply & Save all at once.
+        Click elements to blur them, then apply and save all at once.
       </div>
     `;
   }
@@ -138,8 +140,12 @@ class BlurMode {
     if (!btn) return;
     const count = this._previewQueue.length;
     btn.disabled = count === 0;
-    btn.textContent = count > 0
-      ? `🔵 Apply & Save Blurs (${count})`
-      : "🔵 Apply & Save Blurs";
+    const label = btn.querySelector(".pagesurgeon-panel__button-label");
+    const text = count > 0 ? `Apply & save blurs (${count})` : "Apply & save blurs";
+    if (label) {
+      label.textContent = text;
+    } else {
+      btn.textContent = text;
+    }
   }
 }

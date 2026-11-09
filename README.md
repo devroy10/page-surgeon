@@ -56,6 +56,7 @@ PageSurgeon is built on Manifest V3 and native browser APIs only. It has zero de
 - [Usage](#usage)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Permissions](#permissions)
+- [Privacy](#privacy)
 - [Scope](#scope)
 - [Development](#development)
 - [Roadmap](#roadmap)
@@ -135,10 +136,19 @@ PageSurgeon asks for the smallest set of Chrome permissions that its modes need.
 
 | Permission | Used by | Purpose |
 |---|---|---|
-| `activeTab` | All modes | Run on the tab you are working in |
-| `scripting` | All modes | Inject the mode scripts into the page |
+| `host_permissions: <all_urls>` | All modes | Run the page overlay on any site and re-apply saved blur rules after reload |
 | `storage` | Blur | Save blur rules in `chrome.storage.local` |
 | `downloads` | Screenshot | Save captured PNG files |
+
+PageSurgeon does not request `tabs`, `scripting`, `activeTab`, or any network permission.
+
+## Privacy
+
+PageSurgeon processes page content locally in your browser. It does not send page content, screenshots, blur rules, browsing activity, or usage data to a server. It has no account system, analytics, ads, or telemetry.
+
+Screenshots are saved to your Downloads folder. Blur rules (the page hostname plus a CSS selector) are stored in `chrome.storage.local` until you clear extension data or uninstall the extension.
+
+See [PRIVACY.md](PRIVACY.md) for the full policy.
 
 ## Scope
 
@@ -165,14 +175,21 @@ pagesurgeon/
 │   ├── content.js          # Mode controller
 │   ├── popup.js            # Popup UI
 │   ├── utils/
-│   │   └── dom-utils.js    # Shared helpers
+│   │   ├── dom-utils.js      # Shared helpers
+│   │   ├── scroll-capture.js # Scroll plan for large elements
+│   │   └── stitcher.js       # Canvas tile stitching
 │   └── modes/
 │       ├── delete-mode.js
 │       ├── edit-mode.js
 │       ├── screenshot-mode.js
 │       └── blur-mode.js
-└── docs/
-    └── PRD.md
+├── assets/
+│   └── store/                # Chrome Web Store screenshots and tile
+├── docs/
+│   ├── PRD.md
+│   └── RELEASE_CHECKLIST.md
+├── PRIVACY.md
+└── LICENSE
 ```
 
 - `manifest.json`: Manifest V3 configuration and permissions
@@ -181,7 +198,8 @@ pagesurgeon/
 - `scripts/popup.js`: popup UI and mode selection
 - `scripts/modes/`: one class per mode, all built on the shared infrastructure
 - `scripts/utils/dom-utils.js`: shared DOM helpers
-- `docs/`: product requirements document
+- `docs/`: product requirements and the Chrome Web Store release checklist
+- `assets/store/`: 1280x800 store screenshots and the 440x280 promotional tile
 
 To add a mode, create a class in `scripts/modes/` and register it in `content.js`. Pull requests are welcome.
 

@@ -109,10 +109,12 @@ class EditMode {
   getPanelHTML() {
     return `
       <button class="pagesurgeon-panel__button pagesurgeon-panel__button--action" id="modeActionBtn" disabled>
-        💾 Save & Exit
+        <span class="pagesurgeon-panel__button-icon">${DomUtils.icon("check")}</span>
+        <span class="pagesurgeon-panel__button-label">Save & exit</span>
       </button>
       <button class="pagesurgeon-panel__button pagesurgeon-panel__button--cancel" id="modeCancelBtn">
-        ❌ Cancel
+        <span class="pagesurgeon-panel__button-icon">${DomUtils.icon("x")}</span>
+        <span class="pagesurgeon-panel__button-label">Exit</span>
       </button>
       <div class="pagesurgeon-panel__info">
         Click a text element to edit. Enter to save, Escape to cancel.

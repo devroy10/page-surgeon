@@ -80,7 +80,7 @@ class ScreenshotMode {
       filename: `pagesurgeon-${Date.now()}.png`,
     });
     if (result && result.success) {
-      this.controller.updateStatus("Screenshot saved! ✓");
+      this.controller.updateStatus("Screenshot saved!");
     } else {
       this.controller.updateStatus("Capture failed. Try again.");
     }
@@ -164,16 +164,18 @@ class ScreenshotMode {
       filename: `pagesurgeon-${Date.now()}.png`,
     });
 
-    this.controller.updateStatus("Screenshot saved! ✓");
+    this.controller.updateStatus("Screenshot saved!");
   }
 
   getPanelHTML() {
     return `
       <button class="pagesurgeon-panel__button pagesurgeon-panel__button--action" id="modeActionBtn" disabled>
-        📷 Capture Screenshot
+        <span class="pagesurgeon-panel__button-icon">${DomUtils.icon("camera")}</span>
+        <span class="pagesurgeon-panel__button-label">Capture screenshot</span>
       </button>
       <button class="pagesurgeon-panel__button pagesurgeon-panel__button--cancel" id="modeCancelBtn">
-        ❌ Cancel
+        <span class="pagesurgeon-panel__button-icon">${DomUtils.icon("x")}</span>
+        <span class="pagesurgeon-panel__button-label">Exit</span>
       </button>
       <div class="pagesurgeon-panel__info">
         Select an element, then click Capture. Captures full element even if scrolled off-screen.
